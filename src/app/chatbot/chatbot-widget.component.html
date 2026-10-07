@@ -1,0 +1,87 @@
+<section class="chatbot-layer" aria-label="Gopi Laundry AI chatbot">
+  <div class="chatbot-card" [class.open]="isOpen" [attr.aria-hidden]="!isOpen">
+    <header class="chatbot-header">
+      <div class="chatbot-title">
+        <span class="chatbot-mark">AI</span>
+        <div>
+          <h2>Gopi Laundry AI</h2>
+          <p>Dry cleaning &amp; steam iron assistant</p>
+          <span class="online-status"><i></i>Online</span>
+        </div>
+      </div>
+      <div class="chatbot-actions">
+        <button type="button" class="icon-button" [attr.aria-label]="isMuted ? 'Unmute voice answer' : 'Mute voice answer'" (click)="toggleMute()">
+          <span>{{ isMuted ? '🔇' : '🔊' }}</span>
+        </button>
+        <button type="button" class="icon-button" aria-label="Clear chat" (click)="clearChat()">
+          <span>↺</span>
+        </button>
+        <button type="button" class="icon-button" aria-label="Close chatbot" (click)="close()">
+          <span>×</span>
+        </button>
+      </div>
+    </header>
+
+    <div #chatBody class="chatbot-body">
+      <article *ngFor="let message of messages" class="message-row" [class.user]="message.author === 'user'" [class.bot]="message.author === 'bot'">
+        <span class="avatar" aria-hidden="true">{{ message.author === 'bot' ? '🤖' : '👤' }}</span>
+        <div class="message-bubble">
+          <span class="message-meta" *ngIf="message.meta">{{ message.meta }}</span>
+          {{ message.text }}
+        </div>
+      </article>
+
+      <article *ngIf="isLoading" class="message-row bot">
+        <span class="avatar" aria-hidden="true">🤖</span>
+        <div class="message-bubble typing" aria-label="Gopi Laundry AI is typing">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </article>
+    </div>
+
+    <div class="suggestion-row" aria-label="Quick suggestions">
+      <button type="button" *ngFor="let suggestion of suggestions" [disabled]="isLoading" (click)="useSuggestion(suggestion)">
+        {{ suggestion }}
+      </button>
+    </div>
+
+    <div class="voice-feedback" *ngIf="voiceStatus || voiceError" [class.error]="voiceError">
+      <span aria-hidden="true"></span>
+      <p>{{ voiceError || voiceStatus }}</p>
+    </div>
+
+    <form class="chatbot-input" (submit)="$event.preventDefault(); sendMessage()">
+      <input
+        type="text"
+        name="question"
+        autocomplete="off"
+        [(ngModel)]="question"
+        (ngModelChange)="cancelPendingVoiceSend()"
+        [disabled]="isLoading || isListening"
+        placeholder="Ask about price, pickup, delivery..."
+        aria-label="Ask Gopi Laundry AI"
+        (keydown.enter)="sendMessage()"
+      />
+      <button
+        type="button"
+        class="voice-button"
+        [class.listening]="isListening"
+        [disabled]="isLoading || !isSpeechRecognitionSupported"
+        [attr.aria-label]="isListening ? 'Stop listening' : 'Start voice input'"
+        [attr.title]="isSpeechRecognitionSupported ? (isListening ? 'Stop listening' : 'Start voice input') : 'Voice input is not supported'"
+        (click)="toggleListening()"
+      >
+        <span>{{ isListening ? '■' : '🎙' }}</span>
+      </button>
+      <button type="submit" [disabled]="isLoading || !question.trim()" aria-label="Send question">
+        <span>➤</span>
+      </button>
+    </form>
+  </div>
+
+  <button type="button" class="chatbot-fab" [class.hidden]="isOpen" aria-label="Open Gopi Laundry AI chat" (click)="toggleOpen()">
+    <span>🤖</span>
+  </button>
+</section>
